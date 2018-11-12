@@ -7,6 +7,9 @@ tags: mysql centos7
 author: Epoch
 ---
 
+* content
+{:toc}
+
 **注意：因mysql8.0和之后版本的目前使用范围并不大，当前仅介绍5.7版本的安装。
 当前只针对centos7或者redhat7以上的版本进行介绍安装，其他版本暂不介绍。**
 
