@@ -1,273 +1,147 @@
 ---
 layout: post
-title: mongoose的crud及populate的简单使用
+title: centos7上安装mysql5.7版本
 date: 2018-11-12 13:20:20
-categories: nodejs学习笔记
-tags: nodejs mongoose
-author: 朋也
+categories: mysql学习笔记
+tags: mysql centos7
+author: Epoch
 ---
 
-* content
-{:toc}
+**注意：因mysql8.0和之后版本的目前使用范围并不大，当前仅介绍5.7版本的安装。
+当前只针对centos7或者redhat7以上的版本进行介绍安装，其他版本暂不介绍。**
 
-## 安装mongoose
+如下只介绍rpm安装方式(5.7版本任意版本安装都是一样的)
 
-```
-npm i --save mongoose bluebird
-//mongoose不知道从什么版本开始，在启动的时候，会提示使用bluebird
-```
-
-## 连接数据库
-
-在app.js里加入下面代码
+### **1.下载需要的文件**
 
 
+官方下载mysql的rpm安装包，通常我们只需要下载4个包即可。
 
+下载地址如下：
 
-```js
-var mongoose = require("mongoose");
-mongoose.Promise = require('bluebird');
-mongoose.connect("mongodb://localhost/blog");
-//如果数据库有用户名，密码，端口，使用下面方式连接
-//mongoose.connect('mongodb://user:pass@localhost:port/database');
-//对mongodb设置数据库认证的博客可以参照：https://tomoya92.github.io/2017/04/25/nodejs-mongodb-auth/
-```
+https://dev.mysql.com/downloads/mysql/
 
-## 编写schema并exports model
+关于centos的安装包，下载：
 
-本教程拿博客的数据模型做例子说明
+7或者7版本以上 下载redhat7 X64或者32
 
-```js
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
+6版本下载redhat6 X64或者32
 
-var BlogSchema = new Schema({
-  user: {type: Schema.Types.ObjectId, ref: 'User'},
-  title: String,
-  content: String,
-  createAt: {
-    type: Date,
-    default: Date.now
-  },
-  updateAt: {
-    type: Date
-  },
-  view: {
-    type: Number,
-    default: 0
-  },
-  replyCount: {
-    type: Number,
-    default: 0
-  }
-});
+此下安装过程也可适用redhat
 
-// BlogSchema的静态方法，用于封装复用性比较高的一些方法
-// 下面是一个分页的方法，具体参数，链式方法怎么使用参见：http://mongoosejs.com/docs/guide.html
-BlogSchema.statics = {
-  page: function(no, size, opt, cb) {
-    this.find(opt)
-      .skip((no - 1) * size)
-      .limit(size)
-      .sort({
-        createAt: -1
-      })
-      .exec(cb);
-  }
-}
+只需要下载mysql-5.7.20-1.el7.x86_64.rpm-bundle.tar) 即可，他包含了下面的所有文件。
 
-module.exports = mongoose.model("Blog", BlogSchema);
-```
+mysql安装包有点多，在官方有一句话是这样说的：
+在大多数情况下，你只需要安装MySQL-server和MySQL-client安装包就可以
+安装上一个标准功能的MySQL。对于一个标准安装来说，其他的安装包不是必需的。
+所以我们不必头疼。
 
-## 调用
+而client和server又依赖于一些其他包,所以我们只需要4个包即可。
 
-在routes里新建一个路由文件，blog.js
+mysql-community-client-5.7.20-1.el7.x86_64.rpm
+mysql-community-common-5.7.20-1.el7.x86_64.rpm
+mysql-community-libs-5.7.20-1.el7.x86_64.rpm
+mysql-community-server-5.7.20-1.el7.x86_64.rpm
 
-```js
-var Blog = require("./../models/blog.js");
-var Reply = require("./../models/reply.js");
-var async = require("async"); //可以让nodejs的执行按照自己定义的顺序来运行的一个工具，参见：https://www.npmjs.com/package/async
+### **2.安装**
 
-// 博客详情
-exports.detail = function(req, res) {
-  var id = req.params.id;
-  async.series({
-    blog: function(next) {
-      Blog.findOne({
-        _id: id
-      }, function(err, blog) {
-        next(null, blog);
-      })
-    },
-    replies: function(next) {
-      Reply.find({
-          blog: id
-        })
-        .populate("blog", "title")
-        .exec(function(err, replies) {
-          if (err) console.log(err);
-          console.log(replies);
-          next(null, replies);
-        })
-    }
-  }, function(err, result) {
-    res.render("detail", {
-      blog: result.blog,
-      replies: result.replies
-    })
-  })
-}
+当前操作在root用户下
 
-//创建博客
-exports.create = function(req, res) {
-  res.render("create");
-};
+**1).安装之前的卸载**
+rpm -qa|grep mariadb
+此命令是查询之前版本的mysql
+卸载命令
+rpm -e --nodeps mariadb-libs-5.5.41-2.el7_0.x86_64
+检测自带的mysql以及rpm包
+rpm -qa | grep -i mysql 
 
-//保存博客
-exports.save = function(req, res) {
-  var blog = new Blog();
-  blog.title = req.body.title;
-  blog.content = req.body.content;
-  blog.createAt = Date.now();
+yum -y remove mysql 移除
 
-  blog.save(function(err, result) {
-    if (err) console.log(err);
-    res.redirect("/");
-  })
-}
+**2).安装**
+虽然mysql有如此之多的安装包，但是我们仅需要安装我们需要的就可以了
 
-//编辑博客
-exports.edit = function(req, res) {
-  var id = req.params.id;
-  Blog.findOne({
-    _id: id
-  }, function(err, blog) {
-    if (err) console.log(err);
-    res.render("edit", {
-      blog: blog
-    })
-  })
-}
+再新建之前我们需要先创建用户组
+groupadd mysql 
+useradd -r -g mysql mysql 
 
-//更新博客
-exports.update = function(req, res) {
-  var id = req.body.id;
-  var title = req.body.title;
-  var content = req.body.content;
-  Blog.update({
-    _id: id
-  }, {
-    $set: {
-      title: title,
-      content: content,
-      updateAt: Date.now()
-    }
-  }, function(err, result) {
-    if (err) console.log(err);
-    res.redirect("/");
-  })
-}
+按照步骤安装如下即可。不要跨越步骤，会导致依赖失败。
+rpm -ivh mysql-community-common-5.7.20-1.el7.x86_64.rpm
+rpm -ivh mysql-community-libs-5.7.20-1.el7.x86_64.rpm
+rpm -ivh mysql-community-client-5.7.20-1.el7.x86_64.rpm 
+rpm -ivh mysql-community-server-5.7.20-1.el7.x86_64.rpm 
 
-//删除博客（删除方法是remove，不是delete，在sequelizejs里是destory，这个。。。只能自己去查文档了！）
-exports.delete = function(req, res) {
-  Blog.remove({
-    _id: req.params.id
-  }, function(err, result) {
-    if (err) console.log(err);
-    res.redirect("/");
-  })
-}
-```
+注意：有可能会出现如下类似错误
+[root@localhost upload]# rpm -ivh mysql-community-server-5.7.20-1.el7.x86_64.rpm
+error: Failed dependencies:
+libaio.so.1()(64bit) is needed by MySQL-server-5.5.25a-1.rhel5.x86_64
+libaio.so.1(LIBAIO_0.1)(64bit) is needed by MySQL-server-5.5.25a-1.rhel5.x86_64
+libaio.so.1(LIBAIO_0.4)(64bit) is needed by MySQL-server-5.5.25a-1.rhel5.x86_64
 
-## 最后来说说关联查询
+这是因为环境缺失libaio库导致的，使用yum命令可以安装
 
-mongoose 里查询链式有个方法 populate()
+yum install libaio，其他问题类似这样处理。
 
-官方文档里的语法是这样的
+至此mysql安装成功
 
-```
-populate(path, [select], [model], [match], [options])
-```
+### **3.mysql设置密码和远程访问**
 
-看着那么多参数，其实前两个就能满足大部分的关联查询的需求了，参数解释：
+第一次进入是不知道mysq密码的，可以在var/log/mysqld.log找到mysql的日志，来找到mysql默认设置的初始密码
+搜索关键字generated其中有类似：A temporary  password is generated for root@localhost: 密码
+注意：会出现日志为空的现象，这时候需要启动一下mysql就可以看到日志了，启动命令：systemctl start mysqld.service
 
-- path <Object, String> either the path to populate or an object specifying all parameters
-- [select] <Object, String> Field selection for the population query
-- [model] <Model> The model you wish to use for population. If not specified, populate will look up the model by the name in the Schema's ref field.
-- [match] <Object> Conditions for the population query
-- [options] <Object> Options for the population query (sort, etc)
+mysql -u root -p 进入后需要设置密码，密码可能会设置失败，因为复杂度安全度太低
+set password=password("Password@123");
 
-第一个参数可以理解为要关联查询的文档是谁
-第二个参数意思是要查询关联文档里的哪些字段
-如果想在关联里加入条件，可以这样写
+mysql授予远程访问权限，类似如下，其中的 ON *.* TO 是授予任何主机访问，假若我们只针对具体某类IP也可以进行设置
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'Password@123' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'mysql'@'%' IDENTIFIED BY 'Password@123' WITH GRANT OPTION;
+授予后需要刷新一下权限才能使用，如下
+FLUSH PRIVILEGES;
 
-```js
-.populate({path: 'user', match: {name: req.query.name}})
-```
+### **4.centos7的mysql启动等命令**
 
-下面以博客评论的model来说明
+启动mysql服务
+systemctl start mysqld.service
 
-```js
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
-var ObjectId = Schema.Types.ObjectId;
+停止mysql服务
+systemctl stop mysqld.service
 
-var ReplySchema = new Schema({
-  blog: {//这个字段就是blog与reply的关联字段，保存的是blog的id，如果查询某一条回复是属于哪个博客的，就需要这个字段来建立联系
-    type: ObjectId,
-    ref: "Blog"//表示当前字段指向哪个文档（也就是关联的哪个表）
-  },
-  content: String,
-  createAt: {
-    type: Date,
-    default: Date.now
-  },
-  up: {
-    type: Number,
-    default: 0
-  },
-  down: {
-    type: Number,
-    default: 0
-  }
-})
+重启mysql服务
+systemctl restart mysqld.service
 
-module.exports = mongoose.model("Reply", ReplySchema);
-```
+查看mysql服务当前状态
+systemctl status mysqld.service
 
-关于查询，可以参见博客的crud代码里的detail方法，下面只贴出关联查询部分代码，上面代码贴的有全部的
+设置mysql服务开机自启动
+systemctl enable mysqld.service
 
-```js
-exports.detail = function(req, res) {
-  var id = req.params.id;
-  async.series({
-    blog: function(next) {
-      Blog.findOne({
-        _id: id
-      }, function(err, blog) {
-        next(null, blog);
-      })
-    },
-    replies: function(next) {
-      Reply.find({
-          blog: id
-        })
-        .populate("blog", "title") //将reply与blog关联，并只查出blog的标题，查询出来的数据结构是：{_id: xxx, blog: {title: xxx, _id: xxx}, createAt: xxx ...} 详见console.log(replies), 如果想关联查出blog里的多个字段，populate 第二个参数以空格分割，如：.populate('blog', 'title content')
-        .exec(function(err, replies) {
-          if (err) console.log(err);
-          console.log(replies);
-          next(null, replies);
-        })
-    }
-  }, function(err, result) {
-    res.render("detail", {
-      blog: result.blog,
-      replies: result.replies
-    })
-  })
-}
-```
+停止mysql服务开机自启动
+systemctl disable mysqld.service
 
-## 参考
+### **5.mysql的大小写问题**
 
-- <http://mongoosejs.com/docs/api.html#query_Query-populate>
+A：如果不设置mysql的配置文件，mysql默认是区分大小写的，为了不区分大小写，需要设置如下:
+编辑MySQL安装目录下的my.ini文件，默认文件路径是/etc/my.cnf，使用vi或者vim命令在[mysqld]节下 
+添加 lower_case_table_names=1(备注：为0时大小写敏感，为1时大小写不敏感)，可以实现MySql按照建表Sql语句的大小写状态来定义表名。 
+B：修改默认端口号在[mysqld]下 增加 port=3506 为 端口号，然后重启
+
+### **6.防火墙端口号开放**
+
+如需对外要提供本端口号开放，要做俩个步骤
+1.管理平台将此端口号设为出口
+2.系统需要将此端口开放，因为centos的防火墙的问题
+不建议直接关闭防火墙
+操作如下：
+查看端口号是否开放：firewall-cmd --query-port=3306/tcp
+
+添加指定需要开放的端口：
+firewall-cmd --add-port=3306/tcp --permanent
+备注：--permanent表示永久生效，没有此参数重启后失效
+重载入添加的端口：
+firewall-cmd --reload
+查询指定端口是否开启成功：
+firewall-cmd --query-port=3306/tcp
+
+移除指定端口：
+firewall-cmd --permanent --remove-port=3306/tcp
+
