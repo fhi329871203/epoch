@@ -54,6 +54,7 @@ mysql-community-server-5.7.20-1.el7.x86_64.rpm
 当前操作在root用户下
 
 **1).安装之前的卸载**
+
 rpm -qa|grep mariadb
 此命令是查询之前版本的mysql
 卸载命令
@@ -64,6 +65,7 @@ rpm -qa | grep -i mysql 
 yum -y remove mysql 移除
 
 **2).安装**
+
 虽然mysql有如此之多的安装包，但是我们仅需要安装我们需要的就可以了
 
 再新建之前我们需要先创建用户组
