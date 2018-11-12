@@ -42,8 +42,11 @@ mysql安装包有点多，在官方有一句话是这样说的：
 而client和server又依赖于一些其他包,所以我们只需要4个包即可。
 
 mysql-community-client-5.7.20-1.el7.x86_64.rpm
+
 mysql-community-common-5.7.20-1.el7.x86_64.rpm
+
 mysql-community-libs-5.7.20-1.el7.x86_64.rpm
+
 mysql-community-server-5.7.20-1.el7.x86_64.rpm
 
 ### **2.安装**
@@ -68,9 +71,13 @@ groupadd mysql 
 useradd -r -g mysql mysql 
 
 按照步骤安装如下即可。不要跨越步骤，会导致依赖失败。
+
 rpm -ivh mysql-community-common-5.7.20-1.el7.x86_64.rpm
+
 rpm -ivh mysql-community-libs-5.7.20-1.el7.x86_64.rpm
+
 rpm -ivh mysql-community-client-5.7.20-1.el7.x86_64.rpm 
+
 rpm -ivh mysql-community-server-5.7.20-1.el7.x86_64.rpm 
 
 注意：有可能会出现如下类似错误
