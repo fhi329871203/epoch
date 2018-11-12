@@ -1,3 +1,15 @@
+---
+layout: post
+title: windows上安装redis服务
+date: 2018-11-12 13:20:20
+categories: redis
+tags: redis
+author: Epoch
+---
+
+* content
+{:toc}
+
 windows环境安装案例
 
 下载Redis-x64-3.2.100.msi安装，下一步，直到成功完成。
