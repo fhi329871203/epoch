@@ -5,7 +5,7 @@ title: Epoch的博客
 email: zhangqinglei@epoch.club
 description: 喜欢编码
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://nsoft.top" # the base hostname & protocol for your site, e.g. http://example.com
+url: "http://epochblog.top/" # the base hostname & protocol for your site, e.g. http://example.com
 weibo_username: liygheart
 github_username:  fhi329871203
 
