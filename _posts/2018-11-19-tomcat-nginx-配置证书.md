@@ -13,7 +13,7 @@ published: true
 
 111111111111
 
-下载Redis-x64-3.2.100.msi安装，下一步，直到成功完成。
+222222222222222222222222222222222222
 
 下载地址：https://github.com/MicrosoftArchive/redis/releases
 
