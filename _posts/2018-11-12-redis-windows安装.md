@@ -1,10 +1,11 @@
 ---
 layout: post
 title: windows上安装redis服务
-date: 2018-11-12 13:20:20
+date: {}
 categories: redis
 tags: redis
 author: Epoch
+published: true
 ---
 
 * content
