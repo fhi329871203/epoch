@@ -10,7 +10,7 @@ author: Epoch
 * content
 {:toc}
 
-windows环境安装案例
+1212121
 
 下载Redis-x64-3.2.100.msi安装，下一步，直到成功完成。
 
