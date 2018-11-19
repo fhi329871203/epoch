@@ -1,16 +1,17 @@
 ---
 layout: post
 title: tomcat和Nginx的Https证书配置
-date: 2018-11-12 13:20:20
+date: {}
 categories: redis
 tags: Https证书
 author: Epoch
+published: true
 ---
 
 * content
 {:toc}
 
-windows环境安装案例
+111111111111
 
 下载Redis-x64-3.2.100.msi安装，下一步，直到成功完成。
 
