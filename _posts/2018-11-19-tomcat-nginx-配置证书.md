@@ -1,6 +1,6 @@
 ---
 layout: post
-title: windows上安装redis服务2222222
+title: windows上安装redis服务1111111
 date: {}
 categories: redis
 tags: redis
